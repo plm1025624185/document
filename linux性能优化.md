@@ -36,6 +36,16 @@ grep 'model name' /proc/cpuinfo | wc -l
 * I/O密集型进程，等待I/O也会导致平均负载升高，但CPU使用率不一定很高；
 * 大量等待CPU的进程调度也会导致平均负载升高，此时的CPU使用率也会比较高。
 
+#### 实战
+
+**场景一：CPU密集型进程**
+
+首先，我们在第一个终端运行stress命令，模拟一个CPU使用率100%的场景：
+
+```Linux
+stress --cpu 1 --timeout 600
+```
+
 
 
 # 性能相关命令
