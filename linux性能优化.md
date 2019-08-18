@@ -46,7 +46,65 @@ grep 'model name' /proc/cpuinfo | wc -l
 stress --cpu 1 --timeout 600
 ```
 
+接着，在第二个终端运行uptime查看平均负载的变化情况
 
+![uptime](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/uptime.png)
+
+最后，在第三个终端运行mpstat查看CPU使用率的变化情况：
+
+![mpstat](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/mpstat.png)
+
+从终端二可以看到，1分钟的平均负载会慢慢增加到1.01，而从终端三中可以看到，CPU的使用率是100%，但它的iowait只有0。这说明，平均负载的升高正是由于CPU使用率为100%。
+
+到底是哪个进程导致了CPU使用率为100%？可以使用pidstat来查询：
+
+![pidstat](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/pidstat.png)
+
+从这里可以明显看到，stress进程的CPU使用率接近100%。
+
+**场景二：I/O密集型进程**
+
+首先还是运行stress命令，但这次模拟I/O压力，即不停地执行sync：
+
+```Linux
+stress -i 1 --timeout 600
+```
+
+还是在第二个终端运行uptime查看平均负载的变化情况：
+
+![uptime](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/uptime1.png)
+
+然后，第三个终端运行mpstat查看CPU使用率的变化情况
+
+![mpstat](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/mpstat1.png)
+
+从这里看到，平均负载慢慢增加到0.97，但是CPU占用基本是0，但I/O的处理高达100%（%sys和%iowait）。这说明平均负载的升高是由于I/O的升高。
+
+到底是哪个进程导致了I/O使用率升高呢？可以使用pidstat来查询：
+
+![pidstat](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/pidstat1.png)
+
+可以发现，还是stress进程导致的。
+
+**场景三：大量进程场景**
+
+当系统中运行进程超出CPU运行能力时，就会出现等待CPU的进程
+
+比如，使用stress，但这次模拟的是4个进程：
+
+```Linux
+stress -c 4 --timeout 600
+```
+
+由于我的系统CPU只有1个，明显比4个进程小多了，因而，系统的CPU处于严重过载状态。
+
+![uptime](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/uptime2.png)
+
+接着运行pidstat来看一下进程的情况：
+
+![pidstat](https://raw.githubusercontent.com/plm1025624185/document/master/images/linux_performance/CPU/pidstat2.png)
+
+可以看出4个进程在争抢1个CPU。这些超出CPU计算能力的进程，最终导致CPU过载。
 
 # 性能相关命令
 
