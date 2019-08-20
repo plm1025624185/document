@@ -152,4 +152,3 @@ sequenceDiagram
 		Bob->>Alice: Thanks for asking
 	end
 ```
-
